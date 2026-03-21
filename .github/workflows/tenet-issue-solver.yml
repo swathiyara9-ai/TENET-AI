@@ -1,4 +1,4 @@
-name: 🤖 TENET Agent – Issue Solver
+name: 🤖 TENET Agent - Issue Solver
 
 on:
   issue_comment:
@@ -8,6 +8,10 @@ permissions:
   contents: write
   pull-requests: write
   issues: write
+
+concurrency:
+  group: tenet-issue-solver-${{ github.event.issue.number }}
+  cancel-in-progress: false
 
 jobs:
   tenet-solve:
@@ -66,7 +70,6 @@ jobs:
             } catch (e) {
               core.warning(`Could not assign github-actions[bot]: ${e.message}`);
             }
-            // Post a status comment
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -97,8 +100,18 @@ jobs:
 
       - name: Install TENET agent dependencies
         if: steps.permission-check.outputs.allowed == 'true'
+        run: pip install -r .github/tenet_agent/requirements.txt
+
+      - name: Check TENET_AI_KEY is configured
+        if: steps.permission-check.outputs.allowed == 'true'
         run: |
-          pip install -r .github/tenet_agent/requirements.txt
+          if [ -z "$TENET_AI_KEY" ]; then
+            echo "⚠️  TENET_AI_KEY is not set — cannot run issue solver."
+            echo "Add it under Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+        env:
+          TENET_AI_KEY: ${{ secrets.TENET_AI_KEY }}
 
       - name: Run TENET Issue Solver
         if: steps.permission-check.outputs.allowed == 'true'
@@ -112,4 +125,5 @@ jobs:
           REPO: ${{ github.repository }}
           TRIGGERED_BY: ${{ github.event.comment.user.login }}
         run: |
-          python .github/tenet_agent/tenet_solve.py
+          cd .github/tenet_agent
+          python tenet_solve.py
