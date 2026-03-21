@@ -76,9 +76,7 @@ def main():
     model = get_llm_client()
     review_text = call_llm(model, prompt)
 
-    if not review_text or review_text.startswith(
-        "⚠️ TENET Agent encountered an error calling the LLM:"
-    ):
+    if not review_text:
         print("❌ LLM returned an empty or error response.")
         sys.exit(1)
 
@@ -90,8 +88,8 @@ def main():
     post_pr_comment(repo, pr_number, review_text)
 
     # ── Check for critical findings and add label ──────────────────────────────
-    # Use a scoped regex to avoid false positives where "HIGH" or "CRITICAL"
-    # appears in the diff content rather than in an actual severity finding.
+    # Scoped regex avoids false positives where "HIGH" or "CRITICAL" appears
+    # in the diff content rather than in an actual severity finding.
     if re.search(r"\[SEVERITY:\s*(CRITICAL|HIGH)\]", review_text, flags=re.IGNORECASE):
         try:
             pr = repo.get_pull(pr_number)
