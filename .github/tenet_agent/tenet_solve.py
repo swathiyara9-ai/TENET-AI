@@ -1,5 +1,5 @@
 """
-TENET Agent – Issue Solver
+TENET Agent - Issue Solver
 Triggered by: tenet-issue-solver.yml on issue_comment events (/tenet fix).
 
 Flow:
@@ -16,6 +16,8 @@ import os
 import re
 import sys
 import json
+from pathlib import Path
+
 from github import GithubException
 
 from utils import (
@@ -40,12 +42,18 @@ from prompts import (
 def parse_file_changes(llm_output: str) -> dict[str, str] | None:
     """
     Parse the LLM's output into a dict of {filepath: content}.
+
     Expected format per file:
         ### FILE: path/to/file.py
-        ```<lang>
+```<lang>
         <content>
-        ```
+```
+
     Returns None if the LLM flagged CANNOT_FIX.
+    Returns an empty dict if no parseable file blocks were found.
+
+    All filepaths are validated against the repo root to prevent
+    path traversal attacks from malicious LLM output.
     """
     if "### CANNOT_FIX" in llm_output:
         return None
@@ -65,12 +73,25 @@ def parse_file_changes(llm_output: str) -> dict[str, str] | None:
     if not matches:
         return {}
 
+    repo_root = Path(".").resolve()
     changes = {}
+
     for filepath, content in matches:
         filepath = filepath.strip()
         content = content.rstrip()
-        if filepath and content:
-            changes[filepath] = content
+
+        if not filepath or not content:
+            continue
+
+        # Guard against path traversal: resolve against repo root and verify
+        # the result stays inside it. Also block writes into .git/.
+        candidate = (repo_root / filepath).resolve()
+        if not candidate.is_relative_to(repo_root) or ".git" in candidate.parts:
+            print(f"⚠️  Skipping unsafe path from LLM output: {filepath!r}")
+            continue
+
+        changes[str(candidate.relative_to(repo_root))] = content
+
     return changes
 
 
@@ -85,7 +106,8 @@ def extract_commit_message(llm_output: str, fallback: str) -> str:
 # ─── Main flow ────────────────────────────────────────────────────────────────
 
 def main():
-    print("🛡️  TENET Agent – Issue Solver starting...")
+    """Run the TENET Agent issue-solver workflow."""
+    print("🛡️  TENET Agent - Issue Solver starting...")
 
     # ── Gather context ─────────────────────────────────────────────────────────
     issue_number = int(os.environ["ISSUE_NUMBER"])
@@ -145,9 +167,11 @@ def main():
 
     if file_changes is None:
         # LLM said it cannot fix this issue
-        cannot_fix_reason = re.sub(r".*### CANNOT_FIX\s*", "", code_output, flags=re.DOTALL).strip()
+        cannot_fix_reason = re.sub(
+            r".*### CANNOT_FIX\s*", "", code_output, flags=re.DOTALL
+        ).strip()
         comment = (
-            f"## 🤖 TENET Agent – Cannot Auto-Fix\n\n"
+            f"## 🤖 TENET Agent - Cannot Auto-Fix\n\n"
             f"After analyzing issue #{issue_number}, TENET Agent determined it cannot "
             f"generate an automated fix for the following reason:\n\n"
             f"{cannot_fix_reason}\n\n"
@@ -161,9 +185,9 @@ def main():
 
     if not file_changes:
         comment = (
-            f"## 🤖 TENET Agent – Fix Generation Failed\n\n"
-            f"TENET Agent was unable to parse a valid code fix from the LLM response for "
-            f"issue #{issue_number}. The LLM may have misunderstood the request.\n\n"
+            f"## 🤖 TENET Agent - Fix Generation Failed\n\n"
+            f"TENET Agent was unable to parse a valid code fix from the LLM response "
+            f"for issue #{issue_number}. The LLM may have misunderstood the request.\n\n"
             f"**Analysis:**\n{analysis}\n\n"
             f"---\n*TENET Agent 🛡️*"
         )
@@ -183,7 +207,7 @@ def main():
         post_issue_comment(
             repo,
             issue_number,
-            f"## 🤖 TENET Agent – Branch Push Failed\n\n"
+            f"## 🤖 TENET Agent - Branch Push Failed\n\n"
             f"TENET Agent generated a fix for issue #{issue_number} but encountered "
             f"a git error when pushing the branch `{branch_name}`.\n\n"
             f"Please check the Actions run logs for details.\n\n---\n*TENET Agent 🛡️*",
@@ -217,14 +241,14 @@ def main():
         try:
             pr.add_to_labels("tenet-agent")
         except GithubException:
-            pass  # Label doesn't exist, that's fine
+            pass  # Label doesn't exist — not a fatal error
 
     except GithubException as e:
         print(f"❌ Failed to create PR: {e}")
         post_issue_comment(
             repo,
             issue_number,
-            f"## 🤖 TENET Agent – PR Creation Failed\n\n"
+            f"## 🤖 TENET Agent - PR Creation Failed\n\n"
             f"Branch `{branch_name}` was pushed, but opening the PR failed:\n\n"
             f"```\n{e}\n```\n\n"
             f"Please open a PR from that branch manually.\n\n---\n*TENET Agent 🛡️*",
@@ -233,7 +257,7 @@ def main():
 
     # ── Post success comment on original issue ─────────────────────────────────
     success_comment = (
-        f"## 🤖 TENET Agent – Fix Ready for Review\n\n"
+        f"## 🤖 TENET Agent - Fix Ready for Review\n\n"
         f"I've analyzed issue #{issue_number} and generated an automated fix.\n\n"
         f"**PR**: {pr.html_url}\n"
         f"**Branch**: `{branch_name}`\n\n"
