@@ -28,7 +28,7 @@ redis>=5.0.1
 psycopg2-binary>=2.9.9
 
 # HTTP & APIs
-httpx>=0.25.2
+httpx>=0.28.1
 requests>=2.33.1
 
 # Security
