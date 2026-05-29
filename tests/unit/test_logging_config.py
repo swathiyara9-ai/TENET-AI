@@ -112,11 +112,12 @@ class TestSensitiveDataLogging:
     """Tests to ensure sensitive data handling."""
 
     def test_logger_name_not_sensitive(self):
-        """Test that logger name does not contain sensitive information."""
-        logger = setup_logging("test_service")
-        assert "password" not in logger.name.lower()
-        assert "secret" not in logger.name.lower()
-        assert "token" not in logger.name.lower()
+        """Test that setup_logging accepts safe logger names without modification."""
+        safe_name = "test_service"
+        logger = setup_logging(safe_name)
+        assert logger.name == safe_name
+        # Document: callers must not pass sensitive data as logger names
+        # as setup_logging accepts the name verbatim without sanitization
 
     def test_logger_functional_for_normal_messages(self):
         """Test that logger works normally without raising exceptions."""
