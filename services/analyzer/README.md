@@ -23,8 +23,8 @@ The service uses both rule-based heuristics and trained machine learning models 
 * Benign
 * Suspicious
 * Malicious
-* Unknown
-* Error
+* Unknown (internal ML fallback status)
+* Error (internal ML fallback status)
 
 ---
 
