@@ -2,8 +2,8 @@
 name: Documentation
 about: Report a typo, missing information, or suggest improvements to the docs
 title: "[DOCS] "
-labels: documentation, good first issue
-assignees: ''
+labels: ["documentation", "good first issue"]
+assignees: []
 ---
 
 ## Description

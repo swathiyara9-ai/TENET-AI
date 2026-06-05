@@ -8,15 +8,12 @@
 <!-- Brief description of the change -->
 
 ### Key Changes
-- 
-- 
-- 
 
 ---
 
 ## Related Issue
 
-<!-- Link to the issue: Fixes #123 -->
+<!-- Link to the issue: -->
 
 Fixes #
 

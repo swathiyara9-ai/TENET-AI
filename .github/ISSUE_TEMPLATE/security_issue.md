@@ -3,7 +3,7 @@ name: Security Issue
 about: Report a security vulnerability
 title: "[SECURITY] "
 labels: security
-assignees: ''
+assignees: []
 ---
 
 > **IMPORTANT:** If you have discovered a critical security vulnerability that could be exploited, please do **NOT** report it publicly here. Instead, use GitHub's private vulnerability reporting feature or email the maintainers directly.
