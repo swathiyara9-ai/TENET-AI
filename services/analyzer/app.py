@@ -277,7 +277,8 @@ async def analyze_prompt(
                 - ``details`` (dict): Method used and supporting metadata.
 
         Raises:
-            HTTPException 401: If the API key is missing or invalid.
+            HTTPException 401: If the API key is invalid.
+            HTTPException 422: If the required ``X-Api-Key`` header is missing.
             HTTPException 403: If the key lacks the ``"analyze"`` permission.
             HTTPException 429: If the caller has exceeded their rate limit or quota.
 
