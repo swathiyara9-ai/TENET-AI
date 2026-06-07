@@ -261,7 +261,7 @@ async def analyze_prompt(
 
         Args:
             request (AnalysisRequest): The analysis request containing:
-                - ``prompt`` (str): The text to analyze (1–10,000 characters).
+                - ``prompt`` (str): The text to analyze (1-10,000 characters).
                 - ``context`` (str, optional): Additional context (max 5,000 chars).
             x_api_key (str): API key passed via the ``X-Api-Key`` HTTP header.
 
