@@ -66,7 +66,7 @@ export default function CtaSection() {
           </div>
 
           <div className="cta-chips">
-            {['MIT Licensed', 'Docker deployment', 'Developer support'].map((chip, i) => (
+            {["MIT Licensed", "Self-hosted option", "Any LLM provider", "No usage telemetry"].map((chip, i) => (
               <span key={i} className="cta-chip">
                 {chip}
               </span>

@@ -35,63 +35,28 @@ export default function Footer() {
   return (
     <footer className="footer" aria-label="Page Footer">
       <div className="container">
-        <div className="footer-grid">
-          {/* Brand block */}
-          <div className="footer-brand-col">
-            <div className="footer-brand">
-              <TenetLogo size={24} />
-              <span className="footer-name">TENET AI</span>
-            </div>
-            <p className="footer-brand-desc">
-              Next-generation open-source LLM security middleware. Secure your agent pipelines, applications, and APIs in production.
-            </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+          <div className="footer-brand">
+            <TenetLogo size={24} />
+            <span className="footer-name">TENET AI Dev</span>
           </div>
 
-          {/* Product links */}
-          <div>
-            <div className="footer-col-title">Product</div>
-            <div className="footer-col-links">
-              <a href="#home" className="footer-link" onClick={(e) => handleLinkClick(e, 'home')}>Dashboard</a>
-              <a href="#features" className="footer-link" onClick={(e) => handleLinkClick(e, 'features')}>Features</a>
-              <a href="#compare" className="footer-link" onClick={(e) => handleLinkClick(e, 'compare')}>Comparison</a>
-              <a href="#download" className="footer-link" onClick={(e) => handleLinkClick(e, 'download')}>Download SDK</a>
-            </div>
+          <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
+            <a href="https://github.com/TENET-DEV-AI/TENET-AI" target="_blank" rel="noreferrer" className="footer-link">GitHub</a>
+            <a href="https://github.com/TENET-DEV-AI/TENET-AI/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="footer-link">Contributing</a>
+            <a href="https://github.com/TENET-DEV-AI/TENET-AI/blob/main/SECURITY.md" target="_blank" rel="noreferrer" className="footer-link">Security</a>
+            <a href="mailto:saviodsouza8a@gmail.com" className="footer-link">Contact</a>
           </div>
 
-          {/* Community links */}
-          <div>
-            <div className="footer-col-title">Community</div>
-            <div className="footer-col-links">
-              <a href="https://github.com/TENET-DEV-AI/TENET-AI" target="_blank" rel="noreferrer" className="footer-link">GitHub</a>
-              <a href="https://discord.gg/" target="_blank" rel="noreferrer" className="footer-link">Discord Server</a>
-              <a href="https://twitter.com/" target="_blank" rel="noreferrer" className="footer-link">Twitter / X</a>
-              <a href="https://github.com/TENET-DEV-AI/TENET-AI/issues" target="_blank" rel="noreferrer" className="footer-link">Issue Tracker</a>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
+            <a href="#home" className="footer-secured" onClick={(e) => handleLinkClick(e, 'home')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--cyan)' }}>
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              Protected by TENET AI
+            </a>
+            <span className="footer-copy">Built by Savio D'souza · &copy; 2026 MIT</span>
           </div>
-
-          {/* Legal links */}
-          <div>
-            <div className="footer-col-title">Legal</div>
-            <div className="footer-col-links">
-              <a href="/privacy" className="footer-link">Privacy Policy</a>
-              <a href="/terms" className="footer-link">Terms of Service</a>
-              <a href="/license" className="footer-link">MIT License</a>
-              <a href="mailto:security@tenet.ai" className="footer-link">Security Audits</a>
-            </div>
-          </div>
-        </div>
-
-        {/* Footer Bottom */}
-        <div className="footer-bottom">
-          <div className="footer-copy">
-            &copy; {new Date().getFullYear()} TENET AI. Built for the developer community.
-          </div>
-          <a href="#home" className="footer-secured" onClick={(e) => handleLinkClick(e, 'home')} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--cyan)' }}>
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-            Protected by TENET AI Core
-          </a>
         </div>
       </div>
 
