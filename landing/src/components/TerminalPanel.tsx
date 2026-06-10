@@ -124,7 +124,7 @@ export default function TerminalPanel() {
                   style={{ 
                     color: line.tc, 
                     background: line.tb,
-                    border: `1px solid ${line.tc}1f`
+border: `1px solid color-mix(in srgb, ${line.tc} 12%, transparent)`,
                   }}
                 >
                   {line.tag}
