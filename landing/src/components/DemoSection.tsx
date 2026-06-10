@@ -114,11 +114,16 @@ export default function DemoSection() {
     };
   }, [selectedId]);
 
-  const handleCopy = (e: React.MouseEvent, attack: AttackSample) => {
+  const handleCopy = async (e: React.MouseEvent, attack: AttackSample) => {
     e.stopPropagation();
-    navigator.clipboard.writeText(attack.prompt);
-    setCopiedId(attack.id);
-    setTimeout(() => setCopiedId(null), 2000);
+    try {
+      await navigator.clipboard.writeText(attack.prompt);
+      setCopiedId(attack.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      // Optionally show an error state instead of success
+      setCopiedId(null);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, id: string) => {
