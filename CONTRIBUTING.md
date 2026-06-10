@@ -319,7 +319,7 @@ Thank you for making TENET AI better! 🛡️
 
 ---
 
-markdown## 🚀 Release Process
+## 🚀 Release Process
 
 TENET AI uses automated semantic versioning via [git-cliff](https://git-cliff.org/) and GitHub Actions.
 
@@ -330,6 +330,7 @@ TENET AI uses automated semantic versioning via [git-cliff](https://git-cliff.or
 3. Changelog is generated from commit messages
 4. GitHub Release is created with the changelog
 5. Docker image is published to GitHub Container Registry
+6. Python package published to PyPI for stable releases only — rc/beta/alpha tags skip PyPI
 
 ### Version Tag Format
 v1.0.0         — stable release
@@ -346,6 +347,10 @@ v1.0.0-alpha.1 — alpha release
 | `feat!:` | `feat!: breaking API change` | Major (x.0.0) |
 | `docs:` | `docs: update README` | No bump |
 | `chore:` | `chore: update deps` | No bump |
+| `perf:` | `perf: optimize detection` | No bump |
+| `refactor:` | `refactor: clean up analyzer` | No bump |
+| `test:` | `test: add unit tests` | No bump |
+| `security:` | `security: patch vulnerability` | No bump ||
 
 ### Creating a Release (Maintainers Only)
 ```bash
