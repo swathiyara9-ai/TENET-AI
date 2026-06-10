@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: write
+  packages: write
 
 jobs:
   release:
@@ -67,11 +68,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Determine Docker tags
+        id: docker-tags
+        run: |
+          TAGS="ghcr.io/${{ github.repository }}:${{ github.ref_name }}"
+          if [[ ! "${{ github.ref_name }}" =~ -(rc|beta|alpha) ]]; then
+            TAGS="${TAGS},ghcr.io/${{ github.repository }}:latest"
+          fi
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: |
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
-            ghcr.io/${{ github.repository }}:latest
+          tags: ${{ steps.docker-tags.outputs.tags }}
