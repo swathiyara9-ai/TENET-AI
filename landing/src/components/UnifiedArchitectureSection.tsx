@@ -30,7 +30,19 @@ export default function UnifiedArchitectureSection() {
         {/* TOPOLOGY DIAGRAM */}
         <div className="arch-diagram-card">
           <div style={{ minWidth: '950px', position: 'relative', padding: '0 40px' }}>
-            <svg width="100%" viewBox="0 0 1080 500" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ overflow: 'visible' }}>
+            <svg 
+              width="100%" 
+              viewBox="0 0 1080 500" 
+              fill="none" 
+              xmlns="http://www.w3.org/2000/svg" 
+              style={{ overflow: 'visible' }}
+              role="img"
+              aria-labelledby="system-topology-title system-topology-desc"
+            >
+              <title id="system-topology-title">TENET AI system topology and decision pipeline</title>
+              <desc id="system-topology-desc">
+                Requests flow from application inputs into TENET SDK, through parallel detection engines block, flag, sanitize, or allow.
+              </desc>
               <defs>
                 <style dangerouslySetInnerHTML={{ __html: `
                   .dash-line {

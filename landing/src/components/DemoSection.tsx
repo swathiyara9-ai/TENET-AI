@@ -192,7 +192,7 @@ export default function DemoSection() {
                 <div
                   key={attack.id}
                   role="tab"
-                  aria-selected={isActive}
+                  aria-selected={isSelected}
                   tabIndex={0}
                   className={`demo-attack-btn ${isActive ? 'active' : ''}`}
                   style={{

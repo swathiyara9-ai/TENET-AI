@@ -49,17 +49,13 @@ export default function InteractivePieChart({ activeId, onHover, onClick }: Inte
           return (
             <div
               key={slice.id}
-              onMouseEnter={() => onHover(slice.id)}
-              onMouseLeave={() => onHover(null)}
-              onClick={() => onClick(slice.id)}
               style={{
                 position: 'absolute',
                 inset: 0,
                 transformStyle: 'preserve-3d',
                 transition: 'transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
                 transform: isActive ? 'translateZ(6px) scale(1.02)' : 'translateZ(0px) scale(1)',
-                cursor: 'pointer',
-                pointerEvents: 'auto'
+                pointerEvents: 'none'
               }}
             >
               {Array.from({ length: LAYERS }).map((_, i) => {
@@ -88,7 +84,14 @@ export default function InteractivePieChart({ activeId, onHover, onClick }: Inte
                       strokeDasharray={`${slice.strokeLen} 1000`}
                       transform={`rotate(${slice.angle}, 90, 90)`}
                       strokeLinecap="butt"
-                      style={{ transition: 'all 0.3s' }}
+                      onMouseEnter={isTop ? () => onHover(slice.id) : undefined}
+                      onMouseLeave={isTop ? () => onHover(null) : undefined}
+                      onClick={isTop ? () => onClick(slice.id) : undefined}
+                      style={{
+                        transition: 'all 0.3s',
+                        pointerEvents: isTop ? 'visibleStroke' : 'none',
+                        cursor: isTop ? 'pointer' : 'default'
+                      }}
                     />
                   </svg>
                 );
