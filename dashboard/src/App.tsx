@@ -224,8 +224,19 @@ export default function App() {
     }
     if (filters.sourceIP && !ev.source_id?.toLowerCase().includes(filters.sourceIP.toLowerCase())) return false;
     if (filters.detectionType && ev.source_type !== filters.detectionType) return false;
-    if (filters.dateFrom && new Date(ev.timestamp) < new Date(filters.dateFrom)) return false;
-    if (filters.dateTo && new Date(ev.timestamp) > new Date(filters.dateTo + 'T23:59:59')) return false;
+const parseLocalDayStart = (date: string) => {
+  const [y, m, d] = date.split('-').map(Number);
+  return new Date(y, m - 1, d, 0, 0, 0, 0).getTime();
+};
+
+const parseLocalDayEnd = (date: string) => {
+  const [y, m, d] = date.split('-').map(Number);
+  return new Date(y, m - 1, d, 23, 59, 59, 999).getTime();
+};
+
+    const eventTs = new Date(ev.timestamp).getTime();
+    if (filters.dateFrom && eventTs < parseLocalDayStart(filters.dateFrom)) return false;
+    if (filters.dateTo && eventTs > parseLocalDayEnd(filters.dateTo)) return false;
     return true;
   });
 
