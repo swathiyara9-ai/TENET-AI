@@ -69,7 +69,7 @@ pip install -r requirements-dev.txt
 pytest --version
 
 # Check all required testing packages
-pip list | grep -E "pytest|coverage"
+python -m pip show pytest pytest-cov
 ```
 
 ### Development Dependencies Breakdown
