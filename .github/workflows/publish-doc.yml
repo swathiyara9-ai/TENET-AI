@@ -64,18 +64,27 @@ jobs:
               <p>Welcome to the auto-generated API references for the TENET AI security pipeline.</p>
               
               <div class="card">
-                  <h2>Ingest Service</h2>
+                  <h2>🛡️ Ingest Service</h2>
                   <p>Middleware layer for intercepting, validating, and processing LLM requests.</p>
-                  <p><a href="https://petstore.swagger.io/?url=${{ steps.deployment.outputs.page_url }}ingest/openapi.json">View Interactive Swagger Docs ➔</a></p>
+                  <p><a id="ingest-link" href="#">View Interactive Swagger Docs ➔</a></p>
                   <p><small>Raw schema: <a href="ingest/openapi.json">openapi.json</a></small></p>
               </div>
 
               <div class="card">
-                  <h2>Analyzer Service</h2>
+                  <h2>🧠 Analyzer Service</h2>
                   <p>ML-based threat detection engine for classifying prompts.</p>
-                  <p><a href="https://petstore.swagger.io/?url=${{ steps.deployment.outputs.page_url }}analyzer/openapi.json">View Interactive Swagger Docs ➔</a></p>
+                  <p><a id="analyzer-link" href="#">View Interactive Swagger Docs ➔</a></p>
                   <p><small>Raw schema: <a href="analyzer/openapi.json">openapi.json</a></small></p>
               </div>
+
+              <script>
+                  // Dynamically construct the Swagger UI links using the current window location
+                  document.addEventListener("DOMContentLoaded", function() {
+                      const baseUrl = window.location.href.split('?')[0].replace(/\/$/, "");
+                      document.getElementById('ingest-link').href = "https://petstore.swagger.io/?url=" + baseUrl + "/ingest/openapi.json";
+                      document.getElementById('analyzer-link').href = "https://petstore.swagger.io/?url=" + baseUrl + "/analyzer/openapi.json";
+                  });
+              </script>
           </body>
           </html>
           EOF
