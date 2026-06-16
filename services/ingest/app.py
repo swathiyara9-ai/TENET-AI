@@ -339,10 +339,9 @@ async def health_check() -> HealthResponse:
         401: {"model": ErrorResponse, "description": "Invalid API key"},
         403: {"model": ErrorResponse, "description": "Insufficient permissions"},
         422: {"model": ErrorResponse, "description": "Validation error (e.g., empty prompt)"}
-    },
-    dependencies=[Security(api_key_scheme)]
+    }
 )
-async def ingest_llm_event(request: LLMEventRequest, x_api_key: str = Header(...)):
+async def ingest_llm_event(request: LLMEventRequest, x_api_key: Optional[str] = Security(api_key_scheme)):
     auth = await security.require_auth(x_api_key, required_permission="ingest")
     if not request.prompt.strip():
         raise HTTPException(status_code=422, detail="Prompt must not be empty or whitespace")
@@ -462,16 +461,14 @@ def quick_heuristic_check(prompt: str) -> tuple[bool, float, str, str]:
         401: {"model": ErrorResponse, "description": "Invalid API key"},
         403: {"model": ErrorResponse, "description": "Insufficient permissions"},
         503: {"model": ErrorResponse, "description": "Service degraded - event store unavailable"}
-    },
-    dependencies=[Security(api_key_scheme)]
+    }
 )
 async def list_events(
     limit: int = Query(default=50, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
-    x_api_key: str = Header(...),
+    x_api_key: Optional[str] = Security(api_key_scheme),
 ):
     auth = await security.require_auth(x_api_key, required_permission="read")
-
     if redis_cb.state == CircuitState.OPEN or not redis_client:
         raise HTTPException(status_code=503, detail="Service degraded - event store unavailable")
 
@@ -514,12 +511,10 @@ async def list_events(
         403: {"model": ErrorResponse, "description": "Insufficient permissions"},
         404: {"model": ErrorResponse, "description": "Event not found"},
         503: {"model": ErrorResponse, "description": "Service degraded"}
-    },
-    dependencies=[Security(api_key_scheme)]
+    }
 )
-async def get_event(event_id: str, x_api_key: str = Header(...)):
+async def get_event(event_id: str, x_api_key: Optional[str] = Security(api_key_scheme)):
     auth = await security.require_auth(x_api_key, required_permission="read")
-
     if not event_id.strip():
         raise HTTPException(status_code=422, detail="event_id must not be empty")
 
@@ -550,12 +545,10 @@ async def get_event(event_id: str, x_api_key: str = Header(...)):
         401: {"model": ErrorResponse, "description": "Invalid API key"},
         403: {"model": ErrorResponse, "description": "Insufficient permissions"},
         503: {"model": ErrorResponse, "description": "Service degraded"}
-    },
-    dependencies=[Security(api_key_scheme)]
+    }
 )
-async def get_stats(x_api_key: str = Header(...)):
+async def get_stats(x_api_key: Optional[str] = Security(api_key_scheme)):
     auth = await security.require_auth(x_api_key, required_permission="read")
-
     if redis_cb.state == CircuitState.OPEN or not redis_client:
         raise HTTPException(status_code=503, detail="Service degraded - stats unavailable")
 
@@ -599,12 +592,10 @@ async def get_stats(x_api_key: str = Header(...)):
     responses={
         401: {"model": ErrorResponse, "description": "Invalid API key"},
         403: {"model": ErrorResponse, "description": "Insufficient permissions"}
-    },
-    dependencies=[Security(api_key_scheme)]
+    }
 )
-async def circuit_status(x_api_key: str = Header(...)):
+async def circuit_status(x_api_key: Optional[str] = Security(api_key_scheme)):
     auth = await security.require_auth(x_api_key, required_permission="read")
-
     return {
         "name": redis_cb.name,
         "state": redis_cb.state.value,
@@ -621,10 +612,9 @@ async def circuit_status(x_api_key: str = Header(...)):
     responses={
         401: {"model": ErrorResponse, "description": "Invalid API key"},
         403: {"model": ErrorResponse, "description": "Insufficient permissions"}
-    },
-    dependencies=[Security(api_key_scheme)]
+    }
 )
-async def export_audit_logs(limit: int = Query(default=200, ge=1, le=2000), x_api_key: str = Header(...)):
+async def export_audit_logs(limit: int = Query(default=200, ge=1, le=2000), x_api_key: Optional[str] = Security(api_key_scheme)):
     auth = await security.require_auth(x_api_key, required_permission="admin")
     records = security.export_audit_records(auth.org_id, limit=limit)
     security.audit(
