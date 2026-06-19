@@ -2,7 +2,7 @@
 # Updated 2026-01-26 - Security patches applied
 
 # Core Framework (with security fixes)
-fastapi>=0.115.0
+fastapi>=0.137.2
 uvicorn[standard]>=0.46.0
 starlette>=1.2.1  # CVE-2024-47874 fix
 pydantic>=2.13.4
