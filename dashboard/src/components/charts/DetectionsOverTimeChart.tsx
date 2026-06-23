@@ -6,7 +6,7 @@ import type { ChartFilterAction, TimeRange } from '../../types/security';
 import type { TimeBucket } from '../../utils/chartAggregations';
 import { CB_PALETTE } from '../../constants/charts';
 import { ChartCard } from './ChartCard';
-import { CHART_TOOLTIP_PROPS } from './chartTooltipProps';
+import { CHART_TOOLTIP_PROPS, formatCountTooltip } from './chartTooltipProps';
 
 interface Props {
   data: TimeBucket[];
@@ -32,7 +32,35 @@ export function DetectionsOverTimeChart({ data, range, onRangeChange, onFilter }
   const [chartType, setChartType] = useState<'bar' | 'line'>('bar');
 
   const handleClick = (payload: TimeBucket) => {
-    onFilter({ dateFrom: payload.dateFrom, dateTo: payload.dateTo });
+    onFilter({
+      dateFrom: payload.dateFrom,
+      dateTo: payload.dateTo,
+      hourFrom: payload.hourFrom ?? '',
+      hourTo: payload.hourTo ?? '',
+      dayOfWeek: '',
+    });
+  };
+
+  const clickableDot = (dotProps: { cx?: number; cy?: number; index?: number }, active = false) => {
+    const { cx, cy, index } = dotProps;
+    if (cx == null || cy == null || index == null) return null;
+    return (
+      <circle
+        key={active ? `active-${index}` : index}
+        cx={cx}
+        cy={cy}
+        r={active ? 6 : 4}
+        fill={CB_PALETTE[0]}
+        stroke={active ? '#141417' : undefined}
+        strokeWidth={active ? 2 : undefined}
+        cursor="pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          const bucket = data[index];
+          if (bucket) handleClick(bucket);
+        }}
+      />
+    );
   };
 
   return (
@@ -84,7 +112,7 @@ export function DetectionsOverTimeChart({ data, range, onRangeChange, onFilter }
             <Tooltip
               {...CHART_TOOLTIP_PROPS}
               cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
-              formatter={(value: number) => [`${value} detections`, 'Count']}
+              formatter={(value) => formatCountTooltip(value)}
             />
             <Bar
               dataKey="count"
@@ -104,22 +132,15 @@ export function DetectionsOverTimeChart({ data, range, onRangeChange, onFilter }
             <YAxis stroke="#a1a1aa" allowDecimals={false} />
             <Tooltip
               {...CHART_TOOLTIP_PROPS}
-              formatter={(value: number) => [`${value} detections`, 'Count']}
+              formatter={(value) => formatCountTooltip(value)}
             />
             <Line
               type="monotone"
               dataKey="count"
               stroke={CB_PALETTE[0]}
               strokeWidth={2}
-              dot={{ r: 4, cursor: 'pointer', fill: CB_PALETTE[0] }}
-              activeDot={{
-                r: 6,
-                cursor: 'pointer',
-                onClick: (_e, payload) => {
-                  const bucket = payload?.payload as TimeBucket | undefined;
-                  if (bucket) handleClick(bucket);
-                },
-              }}
+              dot={clickableDot}
+              activeDot={(props) => clickableDot(props, true)}
             />
           </LineChart>
         )}

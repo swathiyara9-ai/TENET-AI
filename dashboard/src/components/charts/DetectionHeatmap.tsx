@@ -46,7 +46,7 @@ export function DetectionHeatmap({ cells, onFilter }: Props) {
       description={`Heatmap of detections by day of week and hour of day. ${summaryText(cells)}. Click a cell to filter by that time slot.`}
       className="chart-container-wide"
     >
-      <div className="heatmap-wrapper" role="grid" aria-label="Detection heatmap by day and hour">
+      <div className="heatmap-wrapper" aria-label="Detection heatmap by day and hour">
         <div className="heatmap-header-row">
           <span className="heatmap-corner" aria-hidden="true" />
           <div className="heatmap-hour-labels" aria-hidden="true">
@@ -57,9 +57,9 @@ export function DetectionHeatmap({ cells, onFilter }: Props) {
         </div>
 
         {grid.map((row, dayIndex) => (
-          <div key={dayIndex} className="heatmap-data-row" role="row">
-            <span className="heatmap-day-label" role="rowheader">{DAYS_OF_WEEK[dayIndex]}</span>
-            <div className="heatmap-cells" role="row">
+          <div key={dayIndex} className="heatmap-data-row">
+            <span className="heatmap-day-label">{DAYS_OF_WEEK[dayIndex]}</span>
+            <div className="heatmap-cells">
               {row.map(cell => {
                 const intensity = cell.count / maxCount;
                 const label = `${cell.dayLabel} ${cell.hourLabel}: ${cell.count} detection${cell.count !== 1 ? 's' : ''}`;
@@ -76,6 +76,8 @@ export function DetectionHeatmap({ cells, onFilter }: Props) {
                         dayOfWeek: String(cell.day),
                         hourFrom: String(cell.hour),
                         hourTo: String(cell.hour),
+                        dateFrom: '',
+                        dateTo: '',
                       })
                     }
                   >

@@ -12,6 +12,8 @@ export interface TimeBucket {
   count: number;
   dateFrom: string;
   dateTo: string;
+  hourFrom?: string;
+  hourTo?: string;
 }
 
 export interface HeatmapCell {
@@ -24,13 +26,13 @@ export interface HeatmapCell {
 
 function inferThreatType(event: SecurityEvent): string {
   if (event.threat_type) return event.threat_type;
+  if (event.verdict === 'benign') return 'benign';
   const prompt = event.prompt?.toLowerCase() ?? '';
   if (/ignore.*rules|dan\b|jailbreak/i.test(prompt)) return 'jailbreak';
   if (/bypass|inject|system prompt/i.test(prompt)) return 'prompt_injection';
   if (/extract|leak|password|credential/i.test(prompt)) return 'data_extraction';
   if (/phish|credential|login page/i.test(prompt)) return 'phishing';
   if (/you are now|role|pretend/i.test(prompt)) return 'role_manipulation';
-  if (event.verdict === 'benign') return 'benign';
   return 'unknown';
 }
 
@@ -88,19 +90,67 @@ function toDateInput(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-export function aggregateDetectionsOverTime(events: SecurityEvent[], range: TimeRange): TimeBucket[] {
+/** Local date+hour key — avoids UTC ISO mismatches when bucketing hourly data. */
+function hourlyBucketKey(d: Date): string {
+  return `${toDateInput(d)}T${String(d.getHours()).padStart(2, '0')}`;
+}
+
+export function parseEventTimestamp(timestamp: string): Date | null {
+  const ts = new Date(timestamp);
+  return Number.isNaN(ts.getTime()) ? null : ts;
+}
+
+const CHART_LOCALE = 'en-US';
+
+function formatHourLabel(d: Date): string {
+  return d.toLocaleTimeString(CHART_LOCALE, { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
+function formatDayLabel(d: Date): string {
+  return d.toLocaleDateString(CHART_LOCALE, { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
+function formatShortDate(d: Date): string {
+  return d.toLocaleDateString(CHART_LOCALE, { month: 'short', day: 'numeric' });
+}
+
+/** Anchor buckets to the newest event so historical/filtered data is not dropped. */
+function resolveTimeAnchor(events: SecurityEvent[], fallback: Date): Date {
+  let maxMs = -Infinity;
+  for (const e of events) {
+    const ts = parseEventTimestamp(e.timestamp);
+    if (ts) maxMs = Math.max(maxMs, ts.getTime());
+  }
+  return maxMs !== -Infinity ? new Date(maxMs) : fallback;
+}
+
+export function aggregateDetectionsOverTime(
+  events: SecurityEvent[],
+  range: TimeRange,
+  referenceDate: Date = new Date(),
+): TimeBucket[] {
   if (events.length === 0) return [];
 
-  const now = new Date();
+  const now = resolveTimeAnchor(events, referenceDate);
   const buckets = new Map<string, TimeBucket>();
 
-  const ensureBucket = (key: string, label: string, from: Date, to: Date) => {
+  const ensureBucket = (
+    key: string,
+    label: string,
+    from: Date,
+    to: Date,
+    hours?: { from: number; to: number },
+  ) => {
     if (!buckets.has(key)) {
       buckets.set(key, {
         label,
         count: 0,
         dateFrom: toDateInput(from),
         dateTo: toDateInput(to),
+        ...(hours && {
+          hourFrom: String(hours.from),
+          hourTo: String(hours.to),
+        }),
       });
     }
     return buckets.get(key)!;
@@ -112,15 +162,19 @@ export function aggregateDetectionsOverTime(events: SecurityEvent[], range: Time
       start.setHours(now.getHours() - i, 0, 0, 0);
       const end = new Date(start);
       end.setHours(start.getHours(), 59, 59, 999);
-      const key = start.toISOString();
-      ensureBucket(key, start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), start, end);
+      const key = hourlyBucketKey(start);
+      ensureBucket(
+        key,
+        formatHourLabel(start),
+        start,
+        end,
+        { from: start.getHours(), to: end.getHours() },
+      );
     }
     events.forEach(e => {
-      const ts = new Date(e.timestamp);
-      const bucketStart = startOfHour(ts);
-      const bucketEnd = new Date(bucketStart);
-      bucketEnd.setMinutes(59, 59, 999);
-      const key = bucketStart.toISOString();
+      const ts = parseEventTimestamp(e.timestamp);
+      if (!ts) return;
+      const key = hourlyBucketKey(startOfHour(ts));
       if (buckets.has(key)) buckets.get(key)!.count += 1;
     });
   } else if (range === 'daily') {
@@ -131,10 +185,11 @@ export function aggregateDetectionsOverTime(events: SecurityEvent[], range: Time
       const to = new Date(from);
       to.setHours(23, 59, 59, 999);
       const key = toDateInput(from);
-      ensureBucket(key, from.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }), from, to);
+      ensureBucket(key, formatDayLabel(from), from, to);
     }
     events.forEach(e => {
-      const ts = new Date(e.timestamp);
+      const ts = parseEventTimestamp(e.timestamp);
+      if (!ts) return;
       const key = toDateInput(startOfDay(ts));
       if (buckets.has(key)) buckets.get(key)!.count += 1;
     });
@@ -149,13 +204,14 @@ export function aggregateDetectionsOverTime(events: SecurityEvent[], range: Time
       const key = toDateInput(from);
       ensureBucket(
         key,
-        `${from.toLocaleDateString([], { month: 'short', day: 'numeric' })} – ${to.toLocaleDateString([], { month: 'short', day: 'numeric' })}`,
+        `${formatShortDate(from)} – ${formatShortDate(to)}`,
         from,
         to
       );
     }
     events.forEach(e => {
-      const ts = new Date(e.timestamp);
+      const ts = parseEventTimestamp(e.timestamp);
+      if (!ts) return;
       const key = toDateInput(startOfWeek(ts));
       if (buckets.has(key)) buckets.get(key)!.count += 1;
     });
@@ -168,7 +224,8 @@ export function aggregateHeatmap(events: SecurityEvent[]): HeatmapCell[] {
   const grid = new Map<string, number>();
 
   events.forEach(e => {
-    const ts = new Date(e.timestamp);
+    const ts = parseEventTimestamp(e.timestamp);
+    if (!ts) return;
     const day = ts.getDay();
     const hour = ts.getHours();
     const key = `${day}-${hour}`;

@@ -17,6 +17,7 @@ import {
   aggregateDetectionsOverTime,
   aggregateHeatmap,
   withThreatType,
+  parseEventTimestamp,
 } from './utils/chartAggregations';
 import {
   ThreatTypeBreakdownChart,
@@ -192,8 +193,8 @@ export default function App() {
         axios.get(`${API_BASE}/health`),
         axios.get(`http://localhost:8100/health`)
       ]);
-      if (eventsRes.status === 'fulfilled' && eventsRes.value.data.events?.length) {
-        setEvents(eventsRes.value.data.events);
+      if (eventsRes.status === 'fulfilled') {
+        setEvents(Array.isArray(eventsRes.value.data.events) ? eventsRes.value.data.events : []);
       }
       if (statsRes.status === 'fulfilled') setStats(prev => statsRes.value.data || prev);
       setHealth({
@@ -232,7 +233,8 @@ export default function App() {
       if (resolved !== filters.threatType) return false;
     }
 
-    const eventTs = new Date(ev.timestamp);
+    const eventTs = parseEventTimestamp(ev.timestamp);
+    if (!eventTs) return false;
     if (filters.dateFrom && eventTs.getTime() < parseLocalDayStart(filters.dateFrom)) return false;
     if (filters.dateTo && eventTs.getTime() > parseLocalDayEnd(filters.dateTo)) return false;
     if (filters.dayOfWeek !== '' && eventTs.getDay() !== Number(filters.dayOfWeek)) return false;

@@ -9,17 +9,20 @@ interface ChartCardProps {
 }
 
 export function ChartCard({ title, description, children, headerExtra, className = '' }: ChartCardProps) {
+  const slug = title.replace(/\s+/g, '-').toLowerCase();
+  const titleId = `chart-title-${slug}`;
+  const descId = `chart-desc-${slug}`;
+
   return (
     <section
       className={`chart-container ${className}`}
-      aria-label={title}
-      role="img"
-      aria-describedby={`chart-desc-${title.replace(/\s+/g, '-').toLowerCase()}`}
+      aria-labelledby={titleId}
+      aria-describedby={descId}
     >
       <div className="chart-header">
         <div>
-          <h3>{title}</h3>
-          <p id={`chart-desc-${title.replace(/\s+/g, '-').toLowerCase()}`} className="chart-sr-summary">
+          <h3 id={titleId}>{title}</h3>
+          <p id={descId} className="chart-sr-summary">
             {description}
           </p>
         </div>

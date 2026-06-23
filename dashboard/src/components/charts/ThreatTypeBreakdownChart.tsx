@@ -5,7 +5,7 @@ import type { ChartFilterAction } from '../../types/security';
 import type { NamedCount } from '../../utils/chartAggregations';
 import { colorForIndex } from '../../constants/charts';
 import { ChartCard } from './ChartCard';
-import { CHART_TOOLTIP_PROPS } from './chartTooltipProps';
+import { CHART_TOOLTIP_PROPS, formatPercentTooltip } from './chartTooltipProps';
 
 interface Props {
   data: NamedCount[];
@@ -51,10 +51,7 @@ export function ThreatTypeBreakdownChart({ data, onFilter }: Props) {
           </Pie>
           <Tooltip
             {...CHART_TOOLTIP_PROPS}
-            formatter={(value: number, name: string) => [
-              `${value} (${total > 0 ? ((value / total) * 100).toFixed(1) : 0}%)`,
-              name,
-            ]}
+            formatter={(value, name) => formatPercentTooltip(value, String(name), total)}
           />
           <Legend
             verticalAlign="bottom"

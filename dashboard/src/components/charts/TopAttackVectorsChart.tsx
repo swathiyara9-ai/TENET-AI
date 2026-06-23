@@ -5,7 +5,7 @@ import type { ChartFilterAction } from '../../types/security';
 import type { NamedCount } from '../../utils/chartAggregations';
 import { colorForIndex } from '../../constants/charts';
 import { ChartCard } from './ChartCard';
-import { CHART_TOOLTIP_PROPS } from './chartTooltipProps';
+import { CHART_TOOLTIP_PROPS, formatCountTooltip } from './chartTooltipProps';
 
 interface Props {
   data: NamedCount[];
@@ -39,7 +39,7 @@ export function TopAttackVectorsChart({ data, onFilter }: Props) {
           <Tooltip
             {...CHART_TOOLTIP_PROPS}
             cursor={{ fill: 'rgba(59, 130, 246, 0.08)' }}
-            formatter={(value: number) => [`${value} detections`, 'Count']}
+            formatter={(value) => formatCountTooltip(value)}
           />
           <Bar
             dataKey="value"

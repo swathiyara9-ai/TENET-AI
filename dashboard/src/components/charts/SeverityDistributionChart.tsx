@@ -6,7 +6,7 @@ import type { ChartFilterAction } from '../../types/security';
 import type { NamedCount } from '../../utils/chartAggregations';
 import { SEVERITY_COLORS } from '../../constants/charts';
 import { ChartCard } from './ChartCard';
-import { CHART_TOOLTIP_PROPS } from './chartTooltipProps';
+import { CHART_TOOLTIP_PROPS, formatPercentTooltip } from './chartTooltipProps';
 
 interface Props {
   data: NamedCount[];
@@ -38,10 +38,7 @@ export function SeverityDistributionChart({ data, onFilter }: Props) {
             <Tooltip
               {...CHART_TOOLTIP_PROPS}
               cursor={{ fill: 'rgba(59, 130, 246, 0.1)' }}
-              formatter={(value: number) => [
-                `${value} (${total > 0 ? ((value / total) * 100).toFixed(1) : 0}%)`,
-                'Count',
-              ]}
+              formatter={(value) => formatPercentTooltip(value, 'Count', total)}
             />
             <Bar
               dataKey="value"
@@ -85,10 +82,7 @@ export function SeverityDistributionChart({ data, onFilter }: Props) {
             </Pie>
             <Tooltip
               {...CHART_TOOLTIP_PROPS}
-              formatter={(value: number, name: string) => [
-                `${value} (${total > 0 ? ((value / total) * 100).toFixed(1) : 0}%)`,
-                name,
-              ]}
+              formatter={(value, name) => formatPercentTooltip(value, String(name), total)}
             />
             <Legend
               verticalAlign="bottom"
