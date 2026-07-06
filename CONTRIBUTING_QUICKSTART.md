@@ -9,11 +9,13 @@ For the full contribution guidelines, coding standards, and release process, see
 
 ## Prerequisites
 
-Make sure these are installed: **Python 3.11+**, **Docker + Docker Compose** (Docker Desktop includes both), and **Git**.
+Make sure these are installed: **Python 3.11+**, **Node.js**, **Docker + Docker Compose** (Docker Desktop includes both), and **Git**.
 
 ```bash
 python --version        # 3.11+
+node --version          # 18+
 docker compose version  # 2.20+
+git --version
 ```
 
 > **Windows users:** Run commands in PowerShell or WSL2. WSL2 is recommended for Docker.
@@ -39,8 +41,16 @@ python -m venv .venv
 source .venv/bin/activate
 
 # Windows (PowerShell)
-.venv\Scripts\activate
+.venv\Scripts\Activate.ps1
 ```
+
+> **Note:** If PowerShell blocks script execution, run:
+
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+Then reopen PowerShell (or open a new PowerShell window) and activate the virtual environment again.
 
 **3. Install dependencies**
 
